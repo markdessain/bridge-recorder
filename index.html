@@ -14,9 +14,125 @@
 
   		<script type="text/javascript" src="https://cdn.firebase.com/v0/firebase.js"></script>
 		
+
+		<style>
+
+
+
+  // hover state
+  .card:hover {
+    bottom: 1em;
+    .transition(~"bottom .15s");
+  }
+
+  
+  // Suit colors
+  // ------------------
+  
+  .card.diams {
+    color: #00f;
+  }
+
+  .card.hearts {
+    color: #f00;
+  }
+
+  .card.spades {
+    color: #000;
+  }
+
+  .card.clubs {
+    color: #090;
+  }
+
+  
+  // Top left - rank and suit
+  // ------------------
+
+  .card .rank,
+  .card .suit {
+    display: block;
+    line-height: 1;
+    text-align: left;
+  }
+
+  .card .rank {
+  }
+
+  .card .suit {
+    line-height: .7;
+  }
+  
+  .card .rank:after {
+    position: absolute;
+    top: .25em;
+    left: .25em;
+    background: #fff;
+  }
+
+  
+  // Middle - big suit
+  // ------------------
+  
+  .card .suit:after {
+    font-family: Georgia, serif;
+    position: absolute;
+    font-size: 3em;
+    right: .1em;
+    bottom: .25em;
+    word-spacing: normal;
+    letter-spacing: normal;
+    line-height: 1;
+  }
+  
+  .card .suit:after {
+    font-family: Arial, sans-serif;
+    line-height: .9;
+    bottom: .35em;
+  }
+
+  .card.diams .suit:after {
+    content: "\2666";
+    right: .4em;
+  }
+
+  .card.hearts .suit:after {
+    content: "\2665";
+    right: .35em;
+  }
+
+  .card.spades .suit:after {
+    content: "\2660";
+    right: .35em;
+  }
+
+  .card.clubs .suit:after {
+    content: "\2663";
+    right: .3em;
+  }
+
+  .card.nt .suit:after {
+    content: "";
+    right: .3em;
+  }
+
+  .btn-default.active {
+	background-color: #428bca;
+	border-color: #428bca;
+	color: white;
+  }
+		</style>
 		<script>
 
 			$( document ).ready(function() {
+
+
+				var club_map = {};
+				club_map["C"] = "clubs";
+				club_map["D"] = "diams";
+				club_map["H"] = "hearts";
+				club_map["S"] = "spades";
+				club_map["NT"] = "nt";
 
 				var table_position = null;
 
@@ -62,7 +178,16 @@
 
 				function addBid() {
 					if(selected_bid_level != null && selected_bid_suit != null) {
-						$("#bids").append("<li>" + selected_bid_level.text() + "" + selected_bid_suit.text() + "</li>");
+
+						suit = '';
+						if(club_map[selected_bid_suit.text().trim()] == 'nt') {
+							suit = 'NT';
+						}
+
+						new_bid = "<span class='card " + club_map[selected_bid_suit.text().trim()] +"  lead'><span class='rank'>" + selected_bid_level.text() + "</span> <span class='suit'>" + suit + "</span></span>";
+
+						$("#bids").append("<li bid='" + selected_bid_level.text() + selected_bid_suit.text().trim() + "' >" + new_bid + "</li>");
+						// $("#bids").append("<li>" + selected_bid_level.text() + "" + selected_bid_suit.text() + "</li>");
 
 						if(selected_bid_level != null) {
 							selected_bid_level.removeClass("active");
@@ -78,7 +203,7 @@
 						selected_bid_alternative = null;
 					}
 					if(selected_bid_alternative != null){
-						$("#bids").append("<li>" + selected_bid_alternative.text()	 + "</li>");
+						$("#bids").append("<li bid='" + selected_bid_alternative.text() + "'><span class='lead'>" + selected_bid_alternative.text()	 + "</span></li>");
 						
 						if(selected_bid_level != null) {
 							selected_bid_level.removeClass("active");
@@ -126,7 +251,13 @@
 
 				function addCard() {
 					if(selected_card_level != null && selected_card_suit != null) {
-						$("#cards").append("<li>" + selected_card_level.text() + "" + selected_card_suit.text() + "</li>");
+
+
+						new_card = "<span class='card " + club_map[selected_card_suit.text().trim()] +"  lead'><span class='rank'>" + selected_card_level.text() + "</span> <span class='suit'></span></span>";
+
+						$("#cards").append("<li card='" + selected_card_level.text() + selected_card_suit.text().trim() + "' >" + new_card + "</li>");
+
+						// $("#cards").append("<li>" + selected_card_level.text() + "" + selected_card_suit.text() + "</li>");
 
 						if(selected_card_level != null) {
 							selected_card_level.removeClass("active");
@@ -153,10 +284,10 @@
 
 
 	  					var allBids = [];
-						$("#bids li").each(function() { allBids.push($(this).text()) });
+						$("#bids li").each(function() { allBids.push($(this).attr('bid')) });
 
 	  					var allCards = [];
-						$("#cards li").each(function() { allCards.push($(this).text()) });
+						$("#cards li").each(function() { allCards.push($(this).attr('card'	)) });
 
 						results = {
 							table: $("#table-number").val(),
@@ -189,8 +320,22 @@
 	<body>
 		<div class="container">
 			<div class="page-header">
-			  <h1>Bridge Recorder <span class="label label-default">0.1</span></h1>
-			</div>
+			  <h1>Bridge
+				<span class='card clubs'>
+	              <span class='suit'></span>
+	            </span>
+				<span class='card spades'>
+	              <span class='suit'></span>
+	            </span>
+				<span class='card hearts'>
+	              <span class='suit'></span>
+	            </span>
+				<span class='card diams'>
+	              <span class='suit'></span>
+	            </span>
+
+			  </h1>
+			</div> 
 			<p class="lead">Enter in your name, table, position and board. For the bidding and card playing, press the combination of buttons which represent the level and suit. All actions can be undone if mistakes are made. Once finished with the board press "Board Complete" and start again for the next board.
 			</p>
 			<div class="page-header">
@@ -234,11 +379,21 @@
 			<br /> <br />
 
 			<div class="btn-group">
-			  <button type="button" class="btn btn-default btn-lg bid-suit">C</button>
-			  <button type="button" class="btn btn-default btn-lg bid-suit">D</button>
-			  <button type="button" class="btn btn-default btn-lg bid-suit">H</button>
-			  <button type="button" class="btn btn-default btn-lg bid-suit">S</button>
-			  <button type="button" class="btn btn-default btn-lg bid-suit">NT</button>
+				<span class='card clubs'>
+					<button type="button" class="btn btn-default btn-lg bid-suit suit">C </button>
+				</span>
+				<span class='card diams'>
+					<button type="button" class="btn btn-default btn-lg bid-suit suit">D </button>
+				</span>
+				<span class='card hearts'>
+					<button type="button" class="btn btn-default btn-lg bid-suit suit">H </button>
+				</span>
+				<span class='card spades'>
+					<button type="button" class="btn btn-default btn-lg bid-suit suit">S </button>
+				</span>
+				<span class='card nt'>
+					<button type="button" class="btn btn-default btn-lg bid-suit suit">NT</button>
+				</span>
 			</div>
 
 			<br /> <br />
@@ -276,10 +431,18 @@
 			</div>
 			<br /> <br />
 			<div class="btn-group">
-			  <button type="button" class="btn btn-default btn-lg card-suit">C</button>
-			  <button type="button" class="btn btn-default btn-lg card-suit">D</button>
-			  <button type="button" class="btn btn-default btn-lg card-suit">H</button>
-			  <button type="button" class="btn btn-default btn-lg card-suit">S</button>
+				<span class='card clubs'>
+					<button type="button" class="btn btn-default btn-lg card-suit suit">C </button>
+				</span>
+				<span class='card diams'>
+					<button type="button" class="btn btn-default btn-lg card-suit suit">D </button>
+				</span>
+				<span class='card hearts'>
+					<button type="button" class="btn btn-default btn-lg card-suit suit">H </button>
+				</span>
+				<span class='card spades'>
+					<button type="button" class="btn btn-default btn-lg card-suit suit">S </button>
+				</span>
 			</div>
 			<br /> <br />
 
