@@ -1,0 +1,310 @@
+<html>
+	<head>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+  		<script type="text/javascript" src="https://cdn.firebase.com/v0/firebase.js"></script>
+		
+		<script>
+
+			$( document ).ready(function() {
+
+
+	  	// 		var allBids = ['XX', '4 S'];
+				// var firebase = new Firebase('https://bridge-recorder.firebaseio.com/players/');
+				// firebase.push({table: "1", board: "1", position: "N", bidding: allBids, cards: ['4 H', 'A S']});
+				 // Get a reference to the root of the chat data.
+
+				var table_position = null;
+
+				$(".table-position").click(function() {
+					if(table_position != null) {
+						table_position.removeClass("active");
+					}
+					table_position = $(this);
+					table_position.addClass("active");
+				});
+
+				var selected_bid_level = null;
+				var selected_bid_suit = null;
+				var selected_bid_alternative = null;
+
+				$(".bit-alternative").click(function() {
+					if(selected_bid_alternative != null) {
+						selected_bid_alternative.removeClass("active");
+					}
+					selected_bid_alternative = $(this);
+					selected_bid_alternative.addClass("active");
+					addBid();
+				});
+
+				$(".bid-level").click(function() {
+					if(selected_bid_level != null) {
+						selected_bid_level.removeClass("active");
+					}
+					selected_bid_level = $(this);
+					selected_bid_level.addClass("active");
+					addBid();
+				});
+
+				$(".bid-suit").click(function() {
+					if(selected_bid_suit != null) {
+						selected_bid_suit.removeClass("active");
+					}
+					selected_bid_suit = $(this);
+					selected_bid_suit.addClass("active");
+					addBid();
+				});
+				
+
+				function addBid() {
+					if(selected_bid_level != null && selected_bid_suit != null) {
+						$("#bids").append("<li>" + selected_bid_level.text() + "" + selected_bid_suit.text() + "</li>");
+
+						if(selected_bid_level != null) {
+							selected_bid_level.removeClass("active");
+						}
+						if(selected_bid_suit != null) {
+							selected_bid_suit.removeClass("active");
+						}
+						if(selected_bid_alternative != null) {
+							selected_bid_alternative.removeClass("active");
+						}
+						selected_bid_level = null;
+						selected_bid_suit = null;
+						selected_bid_alternative = null;
+					}
+					if(selected_bid_alternative != null){
+						$("#bids").append("<li>" + selected_bid_alternative.text()	 + "</li>");
+						
+						if(selected_bid_level != null) {
+							selected_bid_level.removeClass("active");
+						}
+						if(selected_bid_suit != null) {
+							selected_bid_suit.removeClass("active");
+						}
+						if(selected_bid_alternative != null) {
+							selected_bid_alternative.removeClass("active");
+						}
+						selected_bid_level = null;
+						selected_bid_suit = null;
+						selected_bid_alternative = null;
+					}
+				}
+
+				$("#undo-bid").click(function() {
+					$('#bids li:last').remove();
+					return false;
+				});
+
+
+				var selected_card_level = null;
+				var selected_card_suit = null;
+
+
+				$(".card-level").click(function() {
+					if(selected_card_level != null) {
+						selected_card_level.removeClass("active");
+					}
+					selected_card_level = $(this);
+					addCard();
+				});
+
+				$(".card-suit").click(function() {
+					if(selected_card_suit != null) {
+						selected_card_suit.removeClass("active");
+					}
+					selected_card_suit = $(this);
+					addCard();
+				});
+				
+
+				function addCard() {
+					if(selected_card_level != null && selected_card_suit != null) {
+						$("#cards").append("<li>" + selected_card_level.text() + "" + selected_card_suit.text() + "</li>");
+
+						if(selected_card_level != null) {
+							selected_card_level.removeClass("active");
+						}
+						if(selected_card_suit != null) {
+							selected_card_suit.removeClass("active");
+						}
+
+						selected_card_level = null;
+						selected_card_suit = null;
+					}
+				}
+
+				$("#undo-card").click(function() {
+					$('#cards li:last').remove();
+					return false;
+				});
+
+
+				$("#board-complete").click(function() {
+
+					if($("#player-name").val() != "") {
+	  					var firebase = new Firebase('https://bridge-recorder.firebaseio.com/players/' + $("#player-name").val() + "/boards");
+
+
+	  					var allBids = [];
+						$("#bids li").each(function() { allBids.push($(this).text()) });
+
+	  					var allCards = [];
+						$("#cards li").each(function() { allCards.push($(this).text()) });
+
+						results = {
+							table: $("#table-number").val(),
+							board: $("#board-number").val(),
+							position: table_position.text(),
+							bidding: allBids,
+							cards: allCards
+						}
+
+						firebase.push(results);
+
+						// Firebase.goOffline();
+
+
+						selected_bid_level = null;
+						selected_bid_suit = null;
+						selected_bid_alternative = null;
+						selected_card_level = null;
+						selected_card_suit = null;
+
+						$("#cards").empty();
+						$("#bids").empty();
+
+						$("#board-number").val("");
+					}
+				});
+				
+			});
+
+		</script>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="page-header">
+			  <h3>Player Info</h3>
+			</div>
+
+			<input type="text" class="form-control" id="player-name" placeholder="Name">
+			<br />
+  			<input type="text" class="form-control" id="table-number" placeholder="Table Number">
+  			<br />
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default table-position">N</button>
+			  <button type="button" class="btn btn-default table-position">E</button>
+			  <button type="button" class="btn btn-default table-position">S</button>
+			  <button type="button" class="btn btn-default table-position">W</button>
+			</div>
+			
+
+			<div class="page-header">
+			  <h3>Board Info</h3>
+			</div>
+
+			<input type="text" class="form-control" id="board-number" placeholder="Board Number">
+
+
+			<div class="page-header">
+			  <h3>Bidding</h3>
+			</div>
+
+
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default bid-level">1</button>
+			  <button type="button" class="btn btn-default bid-level">2</button>
+			  <button type="button" class="btn btn-default bid-level">3</button>
+			  <button type="button" class="btn btn-default bid-level">4</button>
+			  <button type="button" class="btn btn-default bid-level">5</button>
+			  <button type="button" class="btn btn-default bid-level">6</button>
+			  <button type="button" class="btn btn-default bid-level">7</button>
+			</div>
+
+			<br /> <br />
+
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default bid-suit">C</button>
+			  <button type="button" class="btn btn-default bid-suit">D</button>
+			  <button type="button" class="btn btn-default bid-suit">H</button>
+			  <button type="button" class="btn btn-default bid-suit">S</button>
+			  <button type="button" class="btn btn-default bid-suit">NT</button>
+			</div>
+
+			<br /> <br />
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default bit-alternative">Pass</button>
+			  <button type="button" class="btn btn-default bit-alternative">X</button>
+			  <button type="button" class="btn btn-default bit-alternative">XX</button>
+			</div>
+
+			<br /><br />
+			<ul id="bids">
+			</ul>
+
+			<a href="" id="undo-bid">(Undo bidding)</a>
+
+			<div class="page-header">
+			  <h3>Tricks</h3>
+			</div>
+
+
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default card-level">2</button>
+			  <button type="button" class="btn btn-default card-level">3</button>
+			  <button type="button" class="btn btn-default card-level">4</button>
+			  <button type="button" class="btn btn-default card-level">5</button>
+			  <button type="button" class="btn btn-default card-level">6</button>
+			  <button type="button" class="btn btn-default card-level">7</button>
+			  <button type="button" class="btn btn-default card-level">8</button>
+			  <button type="button" class="btn btn-default card-level">9</button>
+			  <button type="button" class="btn btn-default card-level">10</button>
+			</div>
+
+			<br /> <br />
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default card-level">J</button>
+			  <button type="button" class="btn btn-default card-level">Q</button>
+			  <button type="button" class="btn btn-default card-level">K</button>
+			  <button type="button" class="btn btn-default card-level">A</button>
+			</div>
+			<br /> <br />
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default card-suit">C</button>
+			  <button type="button" class="btn btn-default card-suit">D</button>
+			  <button type="button" class="btn btn-default card-suit">H</button>
+			  <button type="button" class="btn btn-default card-suit">S</button>
+			</div>
+			<br /> <br />
+
+			<ul id="cards">
+			</ul>
+
+			<a href="" id="undo-card">(Undo card)</a>
+
+			
+			<div class="page-header">
+			  <h3>Finish</h3>
+			</div>
+			<button type="button" class="btn btn-success" id="board-complete">Board Complete</button>
+			<br /> <br />
+
+		</div>
+	</body>
+
+
+
+</html>
