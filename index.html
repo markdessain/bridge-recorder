@@ -18,12 +18,6 @@
 
 			$( document ).ready(function() {
 
-
-	  	// 		var allBids = ['XX', '4 S'];
-				// var firebase = new Firebase('https://bridge-recorder.firebaseio.com/players/');
-				// firebase.push({table: "1", board: "1", position: "N", bidding: allBids, cards: ['4 H', 'A S']});
-				 // Get a reference to the root of the chat data.
-
 				var table_position = null;
 
 				$(".table-position").click(function() {
@@ -174,7 +168,7 @@
 
 						firebase.push(results);
 
-						// Firebase.goOffline();
+						Firebase.goOffline();
 
 
 						selected_bid_level = null;
@@ -198,12 +192,17 @@
 	<body>
 		<div class="container">
 			<div class="page-header">
+			  <h1>Bridge Recorder <span class="label label-default">Alpha</span></h1>
+			</div>
+			<p class="lead">Enter in your name, table, position and board. For the bidding and card playing, press the combination of buttons which represent the level and suit. All actions can be undone if mistakes are made. Once finished with the board press "Board Complete" and start again for the next board.
+			</p>
+			<div class="page-header">
 			  <h3>Player Info</h3>
 			</div>
 
-			<input type="text" class="form-control" id="player-name" placeholder="Name">
+			<input type="text" class="form-control input-lg" id="player-name" placeholder="Name">
 			<br />
-  			<input type="text" class="form-control" id="table-number" placeholder="Table Number">
+  			<input type="text" class="form-control input-lg" id="table-number" placeholder="Table Number">
   			<br />
 			<div class="btn-group">
 			  <button type="button" class="btn btn-default btn-lg table-position">N</button>
@@ -217,7 +216,7 @@
 			  <h3>Board Info</h3>
 			</div>
 
-			<input type="text" class="form-control" id="board-number" placeholder="Board Number">
+			<input type="text" class="form-control input-lg" id="board-number" placeholder="Board Number">
 
 
 			<div class="page-header">
@@ -256,7 +255,7 @@
 			<ul id="bids">
 			</ul>
 
-			<a href="" id="undo-bid">(Undo bidding)</a>
+			<a href="" id="undo-bid" class="lead">(Undo bidding)</a>
 
 			<div class="page-header">
 			  <h3>Tricks</h3>
@@ -290,15 +289,18 @@
 			<ul id="cards">
 			</ul>
 
-			<a href="" id="undo-card">(Undo card)</a>
+			<a href="" id="undo-card" class="lead">(Undo card)</a>
 
 			
 			<div class="page-header">
 			  <h3>Finish</h3>
 			</div>
 			<button type="button" class="btn btn-success btn-lg" id="board-complete">Board Complete</button>
+			<div class="page-header">
+			  <h3 class="pull-right"><small>Made by <a href="http://www.markdessain.com">Mark Dessain</a></small></h3>
+			</div>
 			<br /> <br />
-
+			<br /> <br />
 		</div>
 	</body>
 
