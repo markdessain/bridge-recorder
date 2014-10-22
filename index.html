@@ -6,8 +6,7 @@
 		<!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -117,6 +116,7 @@
 						selected_card_level.removeClass("active");
 					}
 					selected_card_level = $(this);
+					selected_card_level.addClass("active");
 					addCard();
 				});
 
@@ -125,6 +125,7 @@
 						selected_card_suit.removeClass("active");
 					}
 					selected_card_suit = $(this);
+					selected_card_suit.addClass("active");
 					addCard();
 				});
 				
