@@ -142,6 +142,11 @@
 						$("#event-name").val(name);
 						$("#event").hide();
 						$("#playing").show();
+
+
+						$('html, body').animate({
+					        scrollTop: $('body').offset().top
+					    }, 500);
 						return false;
 					});
 
@@ -348,8 +353,8 @@
 						$("#board-number").val("");
 
 						$('html, body').animate({
-					        scrollTop: $('#board-number').offset().top
-					    }, 2000);
+					        scrollTop: $('#board-number').offset().top - 100
+					    }, 500);
 					} else{
 						$('#error').show();
 						$('#error').text("Please enter Player Name, Table and Board.");
