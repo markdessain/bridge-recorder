@@ -126,18 +126,27 @@
 
 			$( document ).ready(function() {
 
+				var club_map = {};
+				club_map["C"] = "clubs";
+				club_map["D"] = "diams";
+				club_map["H"] = "hearts";
+				club_map["S"] = "spades";
+				club_map["NT"] = "nt";
+
+
 				var event_name = '';
 				$("#playing").hide();
+				$("#view").hide();
 				$("#error").hide();
 
 				var firebase = new Firebase('https://bridge-recorder.firebaseio.com/events');
 				firebase.on("child_added", function(snapshot) {
 				 	var name = snapshot.val().name;
 				 	var id = snapshot.name()
-					$("#events").append("<li class='lead'><a href='' id='" + id + "' event='" + id + "' >" + name + "</a></li>");
+					$("#events").append("<li class='lead'><a href='' id='play" + id + "' event='" + id + "' >" + name + "</a> - <a href='' id='view" + id + "' event='" + id + "' >View Results</a> (Hidden while game in play)</li>");
 
 
-					$("#" + id).click(function() {
+					$("#play" + id).click(function() {
 						event_name = id;
 						$("#event-name").val(name);
 						$("#event").hide();
@@ -147,6 +156,97 @@
 						$('html, body').animate({
 					        scrollTop: $('body').offset().top
 					    }, 500);
+						return false;
+					});
+
+					$("#view" + id).click(function() {
+						event_name = id;
+						$("#event").hide();
+						$("#view").show();
+						$('html, body').animate({
+					        scrollTop: $('body').offset().top
+					    }, 500);
+
+
+						var boards = {};
+
+						var firebase_view = new Firebase('https://bridge-recorder.firebaseio.com/events/' + id);
+						firebase_view.on("value", function(snapshot) {
+						
+							$.each( snapshot.val().players , function( key, player ) {
+
+								$.each( player.boards , function( key, board ) {
+								  hand = {
+								  	'position': board.position, 
+								  	'bidding': board.bidding, 
+								  	'cards': board.cards
+								  }
+
+								  if(!(board.board in boards)) {
+								  	x = {}
+								  	x[board.table] = [hand];
+								  	boards[board.board] = x;
+
+								  } else {
+									boards[board.board][board.table].push(hand);	
+								  }
+
+								});
+							});
+
+
+							console.log(boards);
+
+							$.each(boards, function(key, board) {
+
+
+								$("#view").append("<h2>Board " + key + "</h2>");
+								$.each(board, function(k, hand) {
+
+
+									$.each(hand, function(k, x) {
+										// console.log(x.bidding);
+
+										var bidding = ""
+										for(var i=0; i<x.bidding.length; ++i){
+											suit = club_map[x.bidding[i].slice(-1)];
+											if(suit!=null){
+												level = x.bidding[i].slice(0,-1);
+											}else{
+												level = x.bidding[i];
+											}
+										    bidding = bidding + "<span class='card " + suit + "'><span class='suit'>" + level + '</span></span>, '
+										}
+
+
+
+										var cards = ""
+										for(var i=0; i<x.cards.length; ++i){
+											suit = club_map[x.cards[i].slice(-1)];
+											if(suit!=null){
+												level = x.cards[i].slice(0,-1);
+											}else{
+												level = x.cards[i];
+											}
+										    cards = cards + "<span class='card " + suit + "'><span class='suit'>" + level + '</span></span>, '
+										}
+
+										$("#view").append("Position: " + x.position);
+										$("#view").append("<br />");
+										$("#view").append("Bids: " + bidding);
+										$("#view").append("<br />");
+										$("#view").append("Cards: " + cards);
+										$("#view").append("<br /><br />");
+
+									});
+									// $("#view").append(b);
+								});
+
+								$("#view").append("</table>");
+
+							});
+						});
+
 						return false;
 					});
 
@@ -167,13 +267,6 @@
 
 
 
-
-				var club_map = {};
-				club_map["C"] = "clubs";
-				club_map["D"] = "diams";
-				club_map["H"] = "hearts";
-				club_map["S"] = "spades";
-				club_map["NT"] = "nt";
 
 				var table_position = null;
 
@@ -539,6 +632,9 @@
 				</div>
 				<br /> <br />
 			</div>
+			<div id="view" class="lead">
+			</div>
+
 		</div>
 	</body>
 
