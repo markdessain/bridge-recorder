@@ -1,0 +1,324 @@
+
+
+  // hover state
+  .card:hover {
+    bottom: 1em;
+    .transition(~"bottom .15s");
+  }
+
+
+  // Suit colors
+  // ------------------
+
+  .card {
+    color: #00f;
+  }
+
+  .card.hearts {
+    color: #f00;
+  }
+
+  .card.spades {
+    color: #000;
+  }
+
+  .card.clubs {
+    color: #090;
+  }
+  .card.diams {
+    color: #00f;
+  }
+
+
+  // Top left - rank and suit
+  // ------------------
+
+  .card .rank,
+  .card .suit {
+    display: block;
+    line-height: 1;
+    text-align: left;
+  }
+
+  .card .rank {
+  }
+
+  .card .suit {
+    line-height: .7;
+  }
+
+  .card .rank:after {
+    position: absolute;
+    top: .25em;
+    left: .25em;
+    background: #fff;
+  }
+
+
+  // Middle - big suit
+  // ------------------
+
+  .card .suit:after {
+    font-family: Georgia, serif;
+    position: absolute;
+    font-size: 3em;
+    right: .1em;
+    bottom: .25em;
+    word-spacing: normal;
+    letter-spacing: normal;
+    line-height: 1;
+  }
+
+  .card .suit:after {
+    font-family: Arial, sans-serif;
+    line-height: .9;
+    bottom: .35em;
+  }
+
+  .card.diams .suit:after {
+    content: "\2666";
+    right: .4em;
+  }
+
+  .card.hearts .suit:after {
+    content: "\2665";
+    right: .35em;
+  }
+
+  .card.spades .suit:after {
+    content: "\2660";
+    right: .35em;
+  }
+
+  .card.clubs .suit:after {
+    content: "\2663";
+    right: .3em;
+  }
+
+  .card.nt .suit:after {
+    content: "";
+    right: .3em;
+  }
+
+  .btn-default.active {
+	background-color: #428bca;
+	border-color: #428bca;
+	color: white;
+  }
+
+
+
+
+
+    #GIF { font-weight: bold; }
+
+p.GIF { display: block; }
+
+.diagram .header {
+    font-size: smaller;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    margin-bottom: 0;
+    margin-top: auto;
+    padding: 0.25em;
+    border: 0.1em outset;
+    width: 6em;
+    float: left;
+    background: #FFFFFF;
+}
+
+.diagram {
+    width: 23em;
+}
+
+.diagram  .hand {
+    width: 8em;
+}
+
+.diagram  .south , .diagram  .north {
+    margin-left: 7em;
+}
+
+.diagram .north {
+    padding-bottom: 1ex;
+}
+
+.diagram  .south {
+    clear: both;
+    padding-top: 1ex;
+}
+
+.diagram  .west {
+    float: left;
+    clear: left;
+}
+
+.diagram  .east {
+    float:right;
+}
+
+.red {
+    color: red;
+}
+
+.hand .seatname {
+    margin-left: 1em;
+    font-size: smaller;
+    font-style: italic;
+}
+
+.holding:before {
+   display: inline;
+}
+
+.spade:before {
+    content: "\2660";
+    right: .4em;
+    color: #000;
+}
+
+.heart:before {
+    content: "\2665";
+    right: .35em;
+    color: #f00;
+}
+
+.diamond:before {
+    content: "\2666";
+    right: .35em;
+    color: #00f;
+
+}
+
+.club:before {
+    content: "\2663";
+    right: .3em;
+    color: #090;
+}
+
+
+
+
+
+
+
+
+
+.container {
+  width: 100%;
+}
+
+#bidding_section, #playing_section {
+    float: left;
+    width: 100%;
+}
+
+#bids {
+float: left;
+width: 600px;
+}
+
+
+#plays {
+float: left;
+width: 1000px;
+}
+
+#bidding_results{
+float: right;
+width: 300px;
+}
+
+  .card {
+  float: left;
+  margin-bottom: 10px;
+  }
+
+  .suit{
+    color: inherit;
+    width: 60px;
+  }
+
+  .undo {
+  float: left;
+  width: 400px;
+  }
+
+  .empty {
+  float: left;
+  width: 60px;
+  }
+
+
+
+#playing_results {
+    float: left;
+    width: 100%;
+}
+
+
+ul.grid {
+    list-style-type: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+
+.grid li {
+    padding: 10px;
+    margin: -1px -1px 0 0;
+    float: left;
+    width: 25%;
+    border: 1px solid black;
+    height: 42px;
+}
+
+.grid li.no_padding{
+    padding: 5px;
+    height: 100%;
+}
+    .grid li.no_padding div{
+    width: 100%;
+    padding: 1px;
+
+}
+
+
+#footer {
+float: left;
+width: 100%;
+margin: 100px 0 100px 0;
+}
+
+.show_single_board {
+    display: none;
+}
+
+
+#result_chooser {
+    float: left;
+    width: 30%;
+    margin-right: 10%;
+}
+
+#result_shower {
+    float: left;
+    width: 50%;
+    margin-right: 10%;
+}
+
+#result_shower_inline {
+    width: 100%;
+    float: left;
+}
+
+.single_result {
+    width: 33%;
+    float: left;
+}
+
+
+.diagram {
+    margin: 0 auto;
+}
