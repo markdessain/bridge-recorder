@@ -1,643 +1,351 @@
+
+<!DOCTYPE html>
 <html>
-	<head>
+  <head>
+    <title>Bridge Recorder - Mark Dessain</title>
+
+
 		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/static/bootstrap.min.css">
 
 		<!-- Optional theme -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="/static/bootstrap-theme.min.css">
+
+		<script src="/static/jquery.min.js"></script>
+		<script src="/static/scripts.js"></script>
+
+		<link rel="stylesheet" href="/static/style.css">
+
+        <script src="/static/bootstrap.min.js"></script>
+
 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-		<!-- Latest compiled and minified JavaScript -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
-  		<script type="text/javascript" src="https://cdn.firebase.com/v0/firebase.js"></script>
-		
-
-		<style>
-
-
-
-  // hover state
-  .card:hover {
-    bottom: 1em;
-    .transition(~"bottom .15s");
-  }
-
-  
-  // Suit colors
-  // ------------------
-  
-  .card.diams {
-    color: #00f;
-  }
-
-  .card.hearts {
-    color: #f00;
-  }
-
-  .card.spades {
-    color: #000;
-  }
-
-  .card.clubs {
-    color: #090;
-  }
-
-  
-  // Top left - rank and suit
-  // ------------------
-
-  .card .rank,
-  .card .suit {
-    display: block;
-    line-height: 1;
-    text-align: left;
-  }
-
-  .card .rank {
-  }
-
-  .card .suit {
-    line-height: .7;
-  }
-  
-  .card .rank:after {
-    position: absolute;
-    top: .25em;
-    left: .25em;
-    background: #fff;
-  }
-
-  
-  // Middle - big suit
-  // ------------------
-  
-  .card .suit:after {
-    font-family: Georgia, serif;
-    position: absolute;
-    font-size: 3em;
-    right: .1em;
-    bottom: .25em;
-    word-spacing: normal;
-    letter-spacing: normal;
-    line-height: 1;
-  }
-  
-  .card .suit:after {
-    font-family: Arial, sans-serif;
-    line-height: .9;
-    bottom: .35em;
-  }
-
-  .card.diams .suit:after {
-    content: "\2666";
-    right: .4em;
-  }
-
-  .card.hearts .suit:after {
-    content: "\2665";
-    right: .35em;
-  }
-
-  .card.spades .suit:after {
-    content: "\2660";
-    right: .35em;
-  }
-
-  .card.clubs .suit:after {
-    content: "\2663";
-    right: .3em;
-  }
-
-  .card.nt .suit:after {
-    content: "";
-    right: .3em;
-  }
-
-  .btn-default.active {
-	background-color: #428bca;
-	border-color: #428bca;
-	color: white;
-  }
-		</style>
-		<script>
-
-			$( document ).ready(function() {
-
-				var club_map = {};
-				club_map["C"] = "clubs";
-				club_map["D"] = "diams";
-				club_map["H"] = "hearts";
-				club_map["S"] = "spades";
-				club_map["NT"] = "nt";
-
-
-				var event_name = '';
-				$("#playing").hide();
-				$("#view").hide();
-				$("#error").hide();
-
-				var firebase = new Firebase('https://bridge-recorder.firebaseio.com/events');
-				firebase.on("child_added", function(snapshot) {
-				 	var name = snapshot.val().name;
-				 	var id = snapshot.name()
-					$("#events").append("<li class='lead'><a href='' id='play" + id + "' event='" + id + "' >" + name + "</a> - <a href='' id='view" + id + "' event='" + id + "' >View Results</a> (Hidden while game in play)</li>");
-
-
-					$("#play" + id).click(function() {
-						event_name = id;
-						$("#event-name").val(name);
-						$("#event").hide();
-						$("#playing").show();
-
-
-						$('html, body').animate({
-					        scrollTop: $('body').offset().top
-					    }, 500);
-						return false;
-					});
-
-					$("#view" + id).click(function() {
-						event_name = id;
-						$("#event").hide();
-						$("#view").show();
-						$('html, body').animate({
-					        scrollTop: $('body').offset().top
-					    }, 500);
-
-
-						var boards = {};
-
-						var firebase_view = new Firebase('https://bridge-recorder.firebaseio.com/events/' + id);
-						firebase_view.on("value", function(snapshot) {
-						
-							$.each( snapshot.val().players , function( key, player ) {
-
-								$.each( player.boards , function( key, board ) {
-								  hand = {
-								  	'position': board.position, 
-								  	'bidding': board.bidding, 
-								  	'cards': board.cards
-								  }
-
-								  if(!(board.board in boards)) {
-								  	x = {}
-								  	x[board.table] = [hand];
-								  	boards[board.board] = x;
-
-								  } else {
-									boards[board.board][board.table].push(hand);	
-								  }
-
-								});
-							});
-
-
-							console.log(boards);
-
-							$.each(boards, function(key, board) {
-
-
-								$("#view").append("<h2>Board " + key + "</h2>");
-								$.each(board, function(k, hand) {
-
-
-									$.each(hand, function(k, x) {
-										// console.log(x.bidding);
-
-										var bidding = ""
-										for(var i=0; i<x.bidding.length; ++i){
-											suit = club_map[x.bidding[i].slice(-1)];
-											if(suit!=null){
-												level = x.bidding[i].slice(0,-1);
-											}else{
-												level = x.bidding[i];
-											}
-										    bidding = bidding + "<span class='card " + suit + "'><span class='suit'>" + level + '</span></span>, '
-										}
-
-
-
-										var cards = ""
-										for(var i=0; i<x.cards.length; ++i){
-											suit = club_map[x.cards[i].slice(-1)];
-											if(suit!=null){
-												level = x.cards[i].slice(0,-1);
-											}else{
-												level = x.cards[i];
-											}
-										    cards = cards + "<span class='card " + suit + "'><span class='suit'>" + level + '</span></span>, '
-										}
-
-										$("#view").append("Position: " + x.position);
-										$("#view").append("<br />");
-										$("#view").append("Bids: " + bidding);
-										$("#view").append("<br />");
-										$("#view").append("Cards: " + cards);
-										$("#view").append("<br /><br />");
-
-									});
-									// $("#view").append(b);
-								});
-
-								$("#view").append("</table>");
-
-							});
-						});
-
-						return false;
-					});
-
-				});
-
-
-				$("#start-event").click(function() {
-
-					if($("#new-event-name").val() != "") {
-	  					var firebase = new Firebase('https://bridge-recorder.firebaseio.com/events');
-						results = {
-							name: $("#new-event-name").val()
-						}
-						firebase.push(results);
-					}
-
-	  			});	
-
-
-
-
-				var table_position = null;
-
-				$(".table-position").click(function() {
-					if(table_position != null) {
-						table_position.removeClass("active");
-					}
-					table_position = $(this);
-					table_position.addClass("active");
-				});
-
-				var selected_bid_level = null;
-				var selected_bid_suit = null;
-				var selected_bid_alternative = null;
-
-				$(".bit-alternative").click(function() {
-					if(selected_bid_alternative != null) {
-						selected_bid_alternative.removeClass("active");
-					}
-					selected_bid_alternative = $(this);
-					selected_bid_alternative.addClass("active");
-					addBid();
-				});
-
-				$(".bid-level").click(function() {
-					if(selected_bid_level != null) {
-						selected_bid_level.removeClass("active");
-					}
-					selected_bid_level = $(this);
-					selected_bid_level.addClass("active");
-					addBid();
-				});
-
-				$(".bid-suit").click(function() {
-					if(selected_bid_suit != null) {
-						selected_bid_suit.removeClass("active");
-					}
-					selected_bid_suit = $(this);
-					selected_bid_suit.addClass("active");
-					addBid();
-				});
-				
-
-				function addBid() {
-					if(selected_bid_level != null && selected_bid_suit != null) {
-
-						suit = '';
-						if(club_map[selected_bid_suit.text().trim()] == 'nt') {
-							suit = 'NT';
-						}
-
-						new_bid = "<span class='card " + club_map[selected_bid_suit.text().trim()] +"  lead'><span class='rank'>" + selected_bid_level.text() + "</span> <span class='suit'>" + suit + "</span></span>";
-
-						$("#bids").append("<li bid='" + selected_bid_level.text() + selected_bid_suit.text().trim() + "' >" + new_bid + "</li>");
-						// $("#bids").append("<li>" + selected_bid_level.text() + "" + selected_bid_suit.text() + "</li>");
-
-						if(selected_bid_level != null) {
-							selected_bid_level.removeClass("active");
-						}
-						if(selected_bid_suit != null) {
-							selected_bid_suit.removeClass("active");
-						}
-						if(selected_bid_alternative != null) {
-							selected_bid_alternative.removeClass("active");
-						}
-						selected_bid_level = null;
-						selected_bid_suit = null;
-						selected_bid_alternative = null;
-					}
-					if(selected_bid_alternative != null){
-						$("#bids").append("<li bid='" + selected_bid_alternative.text() + "'><span class='lead'>" + selected_bid_alternative.text()	 + "</span></li>");
-						
-						if(selected_bid_level != null) {
-							selected_bid_level.removeClass("active");
-						}
-						if(selected_bid_suit != null) {
-							selected_bid_suit.removeClass("active");
-						}
-						if(selected_bid_alternative != null) {
-							selected_bid_alternative.removeClass("active");
-						}
-						selected_bid_level = null;
-						selected_bid_suit = null;
-						selected_bid_alternative = null;
-					}
-				}
-
-				$("#undo-bid").click(function() {
-					$('#bids li:last').remove();
-					return false;
-				});
-
-
-				var selected_card_level = null;
-				var selected_card_suit = null;
-
-
-				$(".card-level").click(function() {
-					if(selected_card_level != null) {
-						selected_card_level.removeClass("active");
-					}
-					selected_card_level = $(this);
-					selected_card_level.addClass("active");
-					addCard();
-				});
-
-				$(".card-suit").click(function() {
-					if(selected_card_suit != null) {
-						selected_card_suit.removeClass("active");
-					}
-					selected_card_suit = $(this);
-					selected_card_suit.addClass("active");
-					addCard();
-				});
-				
-
-				function addCard() {
-					if(selected_card_level != null && selected_card_suit != null) {
-
-
-						new_card = "<span class='card " + club_map[selected_card_suit.text().trim()] +"  lead'><span class='rank'>" + selected_card_level.text() + "</span> <span class='suit'></span></span>";
-
-						$("#cards").append("<li card='" + selected_card_level.text() + selected_card_suit.text().trim() + "' >" + new_card + "</li>");
-
-						// $("#cards").append("<li>" + selected_card_level.text() + "" + selected_card_suit.text() + "</li>");
-
-						if(selected_card_level != null) {
-							selected_card_level.removeClass("active");
-						}
-						if(selected_card_suit != null) {
-							selected_card_suit.removeClass("active");
-						}
-
-						selected_card_level = null;
-						selected_card_suit = null;
-					}
-				}
-
-				$("#undo-card").click(function() {
-					$('#cards li:last').remove();
-					return false;
-				});
-
-
-				$("#board-complete").click(function() {
-
-					if($("#player-name").val() != "" && $("#table-number").val() != "" && $("#board-number").val() != "") {
-						$('#error').hide();
-	  					var firebase = new Firebase('https://bridge-recorder.firebaseio.com/events/' + event_name + '/players/' + $("#player-name").val() + "/boards");
-
-
-	  					var allBids = [];
-						$("#bids li").each(function() { allBids.push($(this).attr('bid')) });
-
-	  					var allCards = [];
-						$("#cards li").each(function() { allCards.push($(this).attr('card'	)) });
-
-						results = {
-							table: $("#table-number").val(),
-							board: $("#board-number").val(),
-							position: table_position.text(),
-							bidding: allBids,
-							cards: allCards
-						}
-
-						firebase.push(results);
-
-						selected_bid_level = null;
-						selected_bid_suit = null;
-						selected_bid_alternative = null;
-						selected_card_level = null;
-						selected_card_suit = null;
-
-						$("#cards").empty();
-						$("#bids").empty();
-
-						$("#board-number").val("");
-
-						$('html, body').animate({
-					        scrollTop: $('#board-number').offset().top - 100
-					    }, 500);
-					} else{
-						$('#error').show();
-						$('#error').text("Please enter Player Name, Table and Board.");
-					}
-				});
-				
-			});
-
-		</script>
-	</head>
-
-	<body>
-		<div class="container">
-			<div class="page-header">
-			  <h1>Bridge
-				<span class='card clubs'>
-	              <span class='suit'></span>
-	            </span>
-				<span class='card spades'>
-	              <span class='suit'></span>
-	            </span>
-				<span class='card hearts'>
-	              <span class='suit'></span>
-	            </span>
-				<span class='card diams'>
-	              <span class='suit'></span>
-	            </span>
-
-			  </h1>
-
-			 </div>
-			 <div id="event">
-				<p class="lead">Select the event you are wanting to take part in, or start off a new event.
-				</p>
-
-				<div class="page-header">
-				  <h3>Events</h3>
-				</div>
-				<ul id="events"></ul>
-
-				<div class="page-header">
-				  <h3>New Event</h3>
-				</div>
-				<input type="text" class="form-control input-lg" id="new-event-name" placeholder="Name">
-				<br />
-				<button type="button" class="btn btn-success btn-lg" id="start-event">Start Event</button>
-				<div class="page-header">
-				  <h3 class="pull-right"><small>Made by <a href="http://www.markdessain.com">Mark Dessain</a></small></h3>
-				</div>
-				<br /> <br />
-			 </div>
-			 <div id="playing">
-				<p class="lead">Enter in your name, table, position and board. For the bidding and card playing, press the combination of buttons which represent the level and suit. All actions can be undone if mistakes are made. Once finished with the board press "Board Complete" and start again for the next board.
-				</p>
-				<div class="page-header">
-				  <h3>Event Info</h3>
-				</div>
-
-				<input type="text" class="form-control input-lg" id="event-name" placeholder="Name" disabled>
-
-				<div class="page-header">
-				  <h3>Player Info</h3>
-				</div>
-
-				<input type="text" class="form-control input-lg" id="player-name" placeholder="Name">
-				<br />
-	  			<input type="number" class="form-control input-lg" id="table-number" placeholder="Table Number">
-	  			<br />
-				<div class="btn-group">
-				  <button type="button" class="btn btn-default btn-lg table-position">N</button>
-				  <button type="button" class="btn btn-default btn-lg table-position">E</button>
-				  <button type="button" class="btn btn-default btn-lg table-position">S</button>
-				  <button type="button" class="btn btn-default btn-lg table-position">W</button>
-				</div>
-				
-
-				<div class="page-header">
-				  <h3>Board Info</h3>
-				</div>
-
-				<input type="number" class="form-control input-lg" id="board-number" placeholder="Board Number">
-
-
-				<div class="page-header">
-				  <h3>Bidding</h3>
-				</div>
-
-
-				<div class="btn-group">
-				  <button type="button" class="btn btn-default btn-lg bid-level">1</button>
-				  <button type="button" class="btn btn-default btn-lg bid-level">2</button>
-				  <button type="button" class="btn btn-default btn-lg bid-level">3</button>
-				  <button type="button" class="btn btn-default btn-lg bid-level">4</button>
-				  <button type="button" class="btn btn-default btn-lg bid-level">5</button>
-				  <button type="button" class="btn btn-default btn-lg bid-level">6</button>
-				  <button type="button" class="btn btn-default btn-lg bid-level">7</button>
-				</div>
-
-				<br /> <br />
-
-				<div class="btn-group">
-					<span class='card clubs'>
-						<button type="button" class="btn btn-default btn-lg bid-suit suit">C </button>
-					</span>
-					<span class='card diams'>
-						<button type="button" class="btn btn-default btn-lg bid-suit suit">D </button>
-					</span>
-					<span class='card hearts'>
-						<button type="button" class="btn btn-default btn-lg bid-suit suit">H </button>
-					</span>
-					<span class='card spades'>
-						<button type="button" class="btn btn-default btn-lg bid-suit suit">S </button>
-					</span>
-					<span class='card nt'>
-						<button type="button" class="btn btn-default btn-lg bid-suit suit">NT</button>
-					</span>
-				</div>
-
-				<br /> <br />
-				<div class="btn-group">
-				  <button type="button" class="btn btn-default btn-lg bit-alternative">Pass</button>
-				  <button type="button" class="btn btn-default btn-lg bit-alternative">X</button>
-				  <button type="button" class="btn btn-default btn-lg bit-alternative">XX</button>
-				</div>
-
-				<br /><br />
-				<ul id="bids">
-				</ul>
-
-				<a href="" id="undo-bid" class="lead">(Undo bidding)</a>
-
-				<div class="page-header">
-				  <h3>Tricks</h3>
-				</div>
-
-
-				<div class="btn-group">
-				  <button type="button" class="btn btn-default btn-lg card-level">2</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">3</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">4</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">5</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">6</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">7</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">8</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">9</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">10</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">J</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">Q</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">K</button>
-				  <button type="button" class="btn btn-default btn-lg card-level">A</button>
-				</div>
-				<br /> <br />
-				<div class="btn-group">
-					<span class='card clubs'>
-						<button type="button" class="btn btn-default btn-lg card-suit suit">C </button>
-					</span>
-					<span class='card diams'>
-						<button type="button" class="btn btn-default btn-lg card-suit suit">D </button>
-					</span>
-					<span class='card hearts'>
-						<button type="button" class="btn btn-default btn-lg card-suit suit">H </button>
-					</span>
-					<span class='card spades'>
-						<button type="button" class="btn btn-default btn-lg card-suit suit">S </button>
-					</span>
-				</div>
-				<br /> <br />
-
-				<ul id="cards">
-				</ul>
-
-				<a href="" id="undo-card" class="lead">(Undo card)</a>
-
-				
-				<div class="page-header">
-				  <h3>Finish</h3>
-				</div>
-				<div class="alert alert-danger" role="alert" id="error"></div>
-				<button type="button" class="btn btn-success btn-lg" id="board-complete">Board Complete</button>
-				<div class="page-header">
-				  <h3 class="pull-right"><small>Made by <a href="http://www.markdessain.com">Mark Dessain</a></small></h3>
-				</div>
-				<br /> <br />
-			</div>
-			<div id="view" class="lead">
-			</div>
-
-		</div>
-	</body>
-
-
-
+  </head>
+  <body>
+
+    <header>
+      <div class="container">
+        <h1 class="logo">Bridge Recorder - Mark Dessain</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      
+
+<div id="options">
+    <input type="number" class="form-control input-lg" id="round-number" placeholder="Round Number">
+    <br />
+    <input type="number" class="form-control input-lg" id="table-number" placeholder="Table Number">
+    <br />
+    <input type="number" class="form-control input-lg" id="board-number" placeholder="Board Number">
+    <br />
+    <input type="text" class="form-control input-lg" id="player_north" placeholder="North">
+    <br />
+    <input type="text" class="form-control input-lg" id="player_east" placeholder="East">
+    <br />
+    <input type="text" class="form-control input-lg" id="player_south" placeholder="South">
+    <br />
+    <input type="text" class="form-control input-lg" id="player_west" placeholder="West">
+</div>
+
+
+<div id="bidding_section">
+
+    <div class="page-header">
+        <h2>Bidding</h2>
+    </div>
+
+
+    <div id="bids">
+        <span class='card'>
+            <button type="button" class="btn btn-default btn-lg undo">Undo </button>
+            <button type="button" class="btn btn-default btn-lg empty">- </button>
+        </span>
+
+        
+            <span class='card clubs'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">1 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">7 </button>
+                
+            </span>
+        
+            <span class='card diams'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">1 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">7 </button>
+                
+            </span>
+        
+            <span class='card hearts'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">1 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">7 </button>
+                
+            </span>
+        
+            <span class='card spades'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">1 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit">7 </button>
+                
+            </span>
+        
+
+        <span class='card'>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">1NT </button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">2NT </button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">3NT </button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">4NT </button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">5NT </button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">6NT </button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">7NT </button>
+            
+        </span>
+        <span class='card'>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">P</button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">X</button>
+            
+                <button type="button" class="btn btn-default btn-lg card-suit suit">XX</button>
+            
+        </span>
+    </div>
+    <div id="bidding_results">
+        <ul class="grid">
+            <li>N</li>
+            <li>E</li>
+            <li>S</li>
+            <li>W</li>
+        </ul>
+    </div>
+</div>
+
+
+
+<div id="playing_section">
+    <div class="page-header">
+        <h2>Playing</h2>
+    </div>
+
+    <div id="plays">
+        <span class='card'>
+            <button type="button" class="btn btn-default btn-lg undo">Undo </button>
+        </span>
+        
+            <span class='card clubs'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-2clubs">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-3clubs">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-4clubs">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-5clubs">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-6clubs">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-7clubs">7 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-8clubs">8 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-9clubs">9 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Tclubs">T </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Jclubs">J </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Qclubs">Q </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Kclubs">K </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Aclubs">A </button>
+                
+            </span>
+        
+            <span class='card diams'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-2diams">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-3diams">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-4diams">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-5diams">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-6diams">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-7diams">7 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-8diams">8 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-9diams">9 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Tdiams">T </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Jdiams">J </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Qdiams">Q </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Kdiams">K </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Adiams">A </button>
+                
+            </span>
+        
+            <span class='card hearts'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-2hearts">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-3hearts">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-4hearts">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-5hearts">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-6hearts">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-7hearts">7 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-8hearts">8 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-9hearts">9 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Thearts">T </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Jhearts">J </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Qhearts">Q </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Khearts">K </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Ahearts">A </button>
+                
+            </span>
+        
+            <span class='card spades'>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-2spades">2 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-3spades">3 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-4spades">4 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-5spades">5 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-6spades">6 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-7spades">7 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-8spades">8 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-9spades">9 </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Tspades">T </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Jspades">J </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Qspades">Q </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Kspades">K </button>
+                
+                    <button type="button" class="btn btn-default btn-lg card-suit suit" id="card-Aspades">A </button>
+                
+            </span>
+        
+    </div>
+
+    <div id="playing_results">
+
+        <ul class="grid">
+            <li>N</li>
+            <li>E</li>
+            <li>S</li>
+            <li>W</li>
+            <li class="no_padding" id="north">
+            </li>
+            <li class="no_padding" id="east"></li>
+            <li class="no_padding" id="south"></li>
+            <li class="no_padding" id="west"></li>
+        </ul>
+
+    </div>
+
+    <div id="footer">
+        <div class="page-header">
+            <h2>Finish</h2>
+        </div>
+        <input type="number" class="form-control input-lg" id="tricks" placeholder="Tricks made">
+        <br />
+        <select class="form-control input-lg"name="board-vulnerability" id="board-vulnerability" placeholder="V">
+            <option value="None">Vulnerability - None</option>
+            <option value="North/South">Vulnerability - North/South</option>
+            <option value="East/West">Vulnerability - East/West</option>
+            <option value="All">Vulnerability - All</option>
+        </select>
+        <br />
+        <button type="button" class="btn btn-success btn-lg" id="board-complete">Board Complete</button>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+
+  </body>
 </html>
